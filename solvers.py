@@ -1,6 +1,7 @@
 import requests
 import math
 from constants import WOLFRAM_APPID
+from pprint import pprint
 
 
 def truncate(number, digits) -> float:
@@ -24,12 +25,15 @@ def wolfram(equation: str) -> float:
     response = requests.get("https://api.wolframalpha.com/v2/query", params={
         "appid": WOLFRAM_APPID,
         "input": equation_convd,
+        "podtitle": "Decimal approximation",
         "format": "plaintext",
         "output": "json"
     })
-    print(response.json())
+    print("Wolfram: ", response.url)
+
+    # pprint(response.json(), indent=2)
     init_result: str = response.json(
-    )["queryresult"]["pods"][1]["subpods"][0]["plaintext"]
+    )["queryresult"]["pods"][0]["subpods"][0]["plaintext"]
     print("init_result:", init_result)
     final_result = init_result.replace("...", "")
     print("final_result:", final_result)
@@ -44,7 +48,7 @@ def compute_error(true_value: float, approx_value: float) -> list[float]:
 
 
 def parse_roundingchopping(value: float, roundingchopping: str, numDigits: int) -> float:
-    if roundingchopping == "chopping":
+    if roundingchopping == "CHOPPING":
         return truncate(value, numDigits)
     else:
         return round(value, numDigits)

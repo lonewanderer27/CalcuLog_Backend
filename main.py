@@ -38,8 +38,9 @@ async def propagation_error(
     true_value_result = 0
     try:
         # if only number is given, then we assign it directly as the true value
-        true_value_result = float(trueValue)
-    except ValueError:
+        true_value_result = eval(trueValue)
+        print("equation has no special symbols, solvable!")
+    except:
         # otherwise, if it's an equation we compute the true value
         true_value_result = wolfram(trueValue)
         print("true_value result:", true_value_result)
@@ -84,8 +85,9 @@ async def propagation_error2(
 ):
     try:
         # if only number is given, then we assign it directly as the true value
-        true_value_result = float(trueValue)
-    except ValueError:
+        true_value_result = eval(trueValue)
+        print("equation has no special symbols, solvable!")
+    except:
         # otherwise, if it's an equation we compute the true value
         true_value_result = wolfram(trueValue)
         print("true_value result:", true_value_result)
@@ -96,6 +98,7 @@ async def propagation_error2(
     [ab_error, percentage_relative_error] = compute_error(
         true_value_result, approx_value
     )
+    print("appox_value:", approx_value)
     print("absolute_error:", ab_error)
     print("percentage_relative_error:", percentage_relative_error)
 
