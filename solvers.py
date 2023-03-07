@@ -27,9 +27,14 @@ def wolfram(equation: str) -> float:
         "format": "plaintext",
         "output": "json"
     })
-    print(response.url)
+    print(response.json())
+    init_result: str = response.json(
+    )["queryresult"]["pods"][1]["subpods"][0]["plaintext"]
+    print("init_result:", init_result)
+    final_result = init_result.replace("...", "")
+    print("final_result:", final_result)
 
-    return float(response.json()["queryresult"]["pods"][1]["subpods"][0]["plaintext"])
+    return float(final_result)
 
 
 def compute_error(true_value: float, approx_value: float) -> list[float]:
@@ -38,7 +43,7 @@ def compute_error(true_value: float, approx_value: float) -> list[float]:
     return [absolute_error, percentage_relative_error]
 
 
-def parse_roundingchopping(value: float, roundingchopping: str, numDigits: int):
+def parse_roundingchopping(value: float, roundingchopping: str, numDigits: int) -> float:
     if roundingchopping == "chopping":
         return truncate(value, numDigits)
     else:

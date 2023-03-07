@@ -1,46 +1,41 @@
 from typing import Union
 from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from internet import internet
-from pydantic import BaseModel
 from solvers import wolfram, compute_error, parse_roundingchopping
 
 import uvicorn
 
 app = FastAPI(title="CalcuLog Backend")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+)
 
-
-class PEvalues(BaseModel):
-    trueValue: str
-    approxValue: float
-    roundingchopping: str
-    numDigits: float
-
-
-class PEresult(BaseModel):
-    absolute_error: float
-    absolute_percentage_error: float
-    relative_error: float
-    relative_percentage_error: float
-
-
-class TMvalues(BaseModel):
-    function: str
-    point: float
-    nthDegree: float
+v1 = FastAPI(title="CalcuLog API v1")
+v2 = FastAPI(title="CalcuLog API v2")
 
 
 @app.get("/")
 async def root(request: Request):
-    return f"CalcuLog Backend | Go to this URL for docs: {request.url._url}docs"
+    return HTMLResponse(
+        f'CalcuLog Backend<br><br>'
+        f'API v1 Docs : <a href="{request.url._url}api/v1/docs">{request.url._url}api/v1/docs</a> <br/>'
+        f'API v1 Route : <a href="{request.url._url}api/v1/">{request.url._url}api/v1/</a> <br/><br/>'
+        f'API v2 Docs : <a href="{request.url._url}api/v2/docs">{request.url._url}api/v2/docs</a> <br/>'
+        f'API v2 Route : <a href="{request.url._url}api/v2/">{request.url._url}api/v2/</a> <br/>'
+    )
 
 
-@app.get("/pe")
+@v1.get("/pe/", name="Propagation Error v1")
 async def propagation_error(
     trueValue: str,
     approxValue: str,
     roundingchopping: str,
     numDigits: int
 ):
+    true_value_result = 0
     try:
         # if only number is given, then we assign it directly as the true value
         true_value_result = float(trueValue)
@@ -57,6 +52,10 @@ async def propagation_error(
         approx_value_result = wolfram(approxValue)
         print("approx_value result:", approx_value_result)
 
+    # we chop or round the approximated value
+    approx_value_result = parse_roundingchopping(
+        approx_value_result, roundingchopping, numDigits)
+
     # compute absolute_error
     [ab_error, percentage_relative_error] = compute_error(
         true_value_result, approx_value_result)
@@ -71,16 +70,52 @@ async def propagation_error(
     return {
         "absolute_error": ab_error,
         "percentage_relative_error": percentage_relative_error,
+        "steps": [
+            ""
+        ]
     }
 
 
-@app.get("/tm")
+@v2.get("/pe/", name="Propagation Error v2")
+async def propagation_error2(
+    trueValue: str,
+    roundingchopping: str,
+    numDigits: int,
+):
+    try:
+        # if only number is given, then we assign it directly as the true value
+        true_value_result = float(trueValue)
+    except ValueError:
+        # otherwise, if it's an equation we compute the true value
+        true_value_result = wolfram(trueValue)
+        print("true_value result:", true_value_result)
+
+    approx_value = parse_roundingchopping(
+        true_value_result, roundingchopping, numDigits)
+
+    [ab_error, percentage_relative_error] = compute_error(
+        true_value_result, approx_value
+    )
+    print("absolute_error:", ab_error)
+    print("percentage_relative_error:", percentage_relative_error)
+
+    return {
+        "approx_value": approx_value,
+        "absolute_error": ab_error,
+        "percentage_relative_error": percentage_relative_error
+    }
+
+
+@v1.get("/tm")
 async def taylor_maclaurin(
     function: str,
     point: float,
     nthDegree: float
 ):
     return "Taylor Maclaurin"
+
+app.mount("/api/v1", v1)
+app.mount("/api/v2", v2)
 
 if __name__ == "__main__":
     print("Starting CalcuLog Backend API")
