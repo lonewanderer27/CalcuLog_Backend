@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from internet import internet
-from solvers import wolfram, compute_error, parse_roundingchopping
+from solvers import wolfram, compute_error, parse_roundingchopping, approx_ln, approx_taylormaclaurin
 
 import uvicorn
 
@@ -98,7 +98,7 @@ async def propagation_error2(
     [ab_error, percentage_relative_error] = compute_error(
         true_value_result, approx_value
     )
-    print("appox_value:", approx_value)
+    print("approx_value:", approx_value)
     print("absolute_error:", ab_error)
     print("percentage_relative_error:", percentage_relative_error)
 
@@ -111,11 +111,32 @@ async def propagation_error2(
 
 @v1.get("/tm")
 async def taylor_maclaurin(
-    function: str,
-    point: float,
-    nthDegree: float
+    point: int,
+    nthDegree: int,
+    roundingchopping: str,
+    numDigits: int,
 ):
-    return "Taylor Maclaurin"
+    x = 0   # default value
+    true_value_result = approx_ln(x)
+    approx_value_result = approx_taylormaclaurin(x, point, nthDegree)
+
+    approx_value = parse_roundingchopping(
+        approx_value_result, roundingchopping, numDigits
+    )
+
+    [ab_error, percentage_relative_error] = compute_error(
+        true_value_result, approx_value
+    )
+
+    print("appox_value:", approx_value)
+    print("absolute_error:", ab_error)
+    print("percentage_relative_error:", percentage_relative_error)
+
+    return {
+        "approx_value": approx_value,
+        "absolute_error": ab_error,
+        "percentage_relative_error": percentage_relative_error
+    }
 
 app.mount("/api/v1", v1)
 app.mount("/api/v2", v2)

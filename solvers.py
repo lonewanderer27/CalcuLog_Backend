@@ -52,3 +52,19 @@ def parse_roundingchopping(value: float, roundingchopping: str, numDigits: int) 
         return truncate(value, numDigits)
     else:
         return round(value, numDigits)
+
+
+def approx_ln(x) -> float:
+    if x <= -1:
+        return float('-inf')
+    else:
+        return math.log(x + 1)
+
+
+def approx_taylormaclaurin(x: int, point: int, nthDegree: int) -> float:
+    if x <= -1:
+        return float('-int')
+    else:
+        terms = [((-1)**n * (x - point)**(n+1)) / (n+1)
+                 for n in range(nthDegree)]
+        return sum(terms)
