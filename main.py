@@ -116,13 +116,16 @@ async def taylor_maclaurin(
     roundingchopping: str,
     numDigits: int,
 ):
-    x = 0   # default value
+    x = 1e-10   # default value
     true_value_result = approx_ln(x)
     approx_value_result = approx_taylormaclaurin(x, point, nthDegree)
+    print("true_value: ", true_value_result)
+    print("approx_value: ", approx_value_result)
 
     approx_value = parse_roundingchopping(
         approx_value_result, roundingchopping, numDigits
     )
+    print("approx_value: ", approx_value)
 
     [ab_error, percentage_relative_error] = compute_error(
         true_value_result, approx_value

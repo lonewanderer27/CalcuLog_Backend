@@ -56,8 +56,10 @@ def parse_roundingchopping(value: float, roundingchopping: str, numDigits: int) 
 
 def approx_ln(x) -> float:
     if x <= -1:
+        print("float-inf")
         return float('-inf')
     else:
+        print("math.log has value!")
         return math.log(x + 1)
 
 
