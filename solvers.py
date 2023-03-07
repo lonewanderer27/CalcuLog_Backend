@@ -32,10 +32,10 @@ def wolfram(equation: str) -> float:
     return float(response.json()["queryresult"]["pods"][1]["subpods"][0]["plaintext"])
 
 
-def compute_absolute_error(true_value: float, approx_value: float) -> list[float]:
-    error = abs(true_value - approx_value)
-    error_percentage = abs(error / true_value) * 100
-    return [error, error_percentage]
+def compute_error(true_value: float, approx_value: float) -> list[float]:
+    absolute_error = abs(true_value - approx_value)
+    percentage_relative_error = abs(absolute_error / true_value) * 100
+    return [absolute_error, percentage_relative_error]
 
 
 def parse_roundingchopping(value: float, roundingchopping: str, numDigits: int):

@@ -2,7 +2,7 @@ from typing import Union
 from fastapi import FastAPI, Request
 from internet import internet
 from pydantic import BaseModel
-from solvers import wolfram, compute_absolute_error, parse_roundingchopping
+from solvers import wolfram, compute_error, parse_roundingchopping
 
 import uvicorn
 
@@ -58,19 +58,19 @@ async def propagation_error(
         print("approx_value result:", approx_value_result)
 
     # compute absolute_error
-    [ab_error, ab_error_percentage] = compute_absolute_error(
+    [ab_error, percentage_relative_error] = compute_error(
         true_value_result, approx_value_result)
-    print("ab_error:", ab_error)
-    print("ab_error_percentage:", ab_error_percentage)
+    print("absolute_error:", ab_error)
+    print("percentage_relative_error:", percentage_relative_error)
 
     ab_error = parse_roundingchopping(ab_error, roundingchopping, numDigits)
-    ab_error_percentage = parse_roundingchopping(
-        ab_error_percentage, roundingchopping, numDigits)
+    percentage_relative_error = parse_roundingchopping(
+        percentage_relative_error, roundingchopping, numDigits)
 
     # return the result as json object
     return {
         "absolute_error": ab_error,
-        "absolute_error_percentage": ab_error_percentage,
+        "percentage_relative_error": percentage_relative_error,
     }
 
 
