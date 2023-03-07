@@ -1,6 +1,6 @@
 from typing import Union
 from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse
+from internet import internet
 from pydantic import BaseModel
 from solvers import wolfram, compute_absolute_error, parse_roundingchopping
 
@@ -74,9 +74,19 @@ async def propagation_error(
     }
 
 
-@app.post("/tm")
-async def taylor_maclaurin(TMvalues: TMvalues):
+@app.get("/tm")
+async def taylor_maclaurin(
+    function: str,
+    point: float,
+    nthDegree: float
+):
     return "Taylor Maclaurin"
 
 if __name__ == "__main__":
-    uvicorn.run("app:app", host="0.0.0.0")
+    print("Starting CalcuLog Backend API")
+    print("checking if there's internet")
+    if internet():
+        print("there is! proceeding")
+        uvicorn.run("main:app", host="0.0.0.0")
+    else:
+        print("you need active internet connection to run the backend! Please check then try again.")
