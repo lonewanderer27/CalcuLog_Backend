@@ -63,7 +63,7 @@ def compute_error(true_value: float, approx_value: float) -> list[float]:
 
 def parse_roundingchopping(value: float, roundingchopping: str, numDigits: int) -> list[float]:
     if roundingchopping == "BOTH":
-        return [truncate(value, numDigits), round(value, numDigits)]
+        return [round(value, numDigits), truncate(value, numDigits)]
 
     if roundingchopping == "CHOPPING":
         return [truncate(value, numDigits)]
