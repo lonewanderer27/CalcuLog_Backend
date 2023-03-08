@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from internet import internet
 import math
-from solvers import wolfram, compute_error, parse_roundingchopping, approx_taylormaclaurin_ln
+from solvers import wolfram, compute_error, parse_roundingchopping, ln_taylormaclaurin
 
 import uvicorn
 
@@ -117,18 +117,19 @@ async def taylor_maclaurin(
     nthDegree: int,
     numDigits: int,
 ):
-    true_value_result = math.log(xvar+1)
-    approx_value = approx_taylormaclaurin_ln(xvar, nthDegree)
+    true_value_result = ln_taylormaclaurin(xvar, nthDegree)
+
     [approx_value_rounded, approx_value_chopped] = parse_roundingchopping(
-        approx_value, "BOTH", numDigits)
+        true_value_result, "BOTH", numDigits)
+
     [absolute_error_rounded, percentage_relative_error_rounded] = compute_error(
         true_value_result, approx_value_rounded)
+
     [absolute_error_chopped, percentage_relative_error_chopped] = compute_error(
         true_value_result, approx_value_chopped)
 
     return {
         "true_value": true_value_result,
-        "approx_value": approx_value,
         "approx_value_rounded": approx_value_rounded,
         "absolute_error_rounded": absolute_error_rounded,
         "percentage_relative_error_rounded": percentage_relative_error_rounded,

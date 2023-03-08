@@ -71,8 +71,38 @@ def parse_roundingchopping(value: float, roundingchopping: str, numDigits: int) 
         return [round(value, numDigits)]
 
 
-def approx_taylormaclaurin_ln(x: int, n: int):
-    result = 0
-    for i in range(1, n+1):
-        result += (-1)**(i+1) * (x**i / i)
-    return result
+def ln_taylormaclaurin(xvar: int, nthDegree: int):
+    dvs = []
+
+    for cd in range(1, nthDegree+1):
+        # print("cd: ", cd)
+        if cd == 1:
+            dvs.append(1)
+        elif cd % 2 == 0:
+            #   - (1    * d1)
+            d = -((cd-1)*dvs[cd-2]/(0+1)**cd)
+            dvs.append(d)
+        elif cd % 2 != 0:
+            d = ((cd-1)*-dvs[cd-2]/(0+1)**cd)
+            dvs.append(d)
+        # print("dvs: ", dvs)
+
+    print("derivatives: ", dvs)
+
+    # COMPUTING TRUE VALUE:
+    final_ans = 0
+    dlast = dvs[-1]
+    print("last derivative: ", dlast)
+
+    # ct = current term
+    for ct in range(1, nthDegree+1):
+        if ct == 1:
+            final_ans = xvar
+        elif ct % 2 == 0:
+            final_ans -= (xvar**ct)/ct
+        else:
+            final_ans += (xvar**ct)/ct
+        print(ct)
+
+    print("final_ans: ", final_ans)
+    return final_ans
