@@ -2,6 +2,7 @@ import requests
 import math
 from constants import WOLFRAM_APPID
 from pprint import pprint
+import re
 
 
 def truncate(number, digits) -> float:
@@ -25,15 +26,28 @@ def wolfram(equation: str) -> float:
     response = requests.get("https://api.wolframalpha.com/v2/query", params={
         "appid": WOLFRAM_APPID,
         "input": equation_convd,
-        "podtitle": "Decimal approximation",
+        "podtitle": ["Decimal approximation", "Result"],
         "format": "plaintext",
         "output": "json"
     })
     print("Wolfram: ", response.url)
 
+    # display the result
     # pprint(response.json(), indent=2)
-    init_result: str = response.json(
-    )["queryresult"]["pods"][0]["subpods"][0]["plaintext"]
+
+    init_result = ""
+    try:
+        for x in response.json()["queryresult"]["pods"]:
+            if x["title"] == "Decimal approximation":
+                init_result = x["subpods"][0]["plaintext"]
+            elif x["title"] == "Result":
+                init_result = x["subpods"][0]["plaintext"]
+    except:
+        print("There is no result!")
+
+    # remove all special characters
+    init_result = re.sub("[^A-Za-z0-9.]", "", init_result)
+
     print("init_result:", init_result)
     final_result = init_result.replace("...", "")
     print("final_result:", final_result)
@@ -63,7 +77,7 @@ def approx_ln(x) -> float:
         return math.log(x + 1)
 
 
-def approx_taylormaclaurin(x: int, point: int, nthDegree: int) -> float:
+def approx_taylormaclaurin(x: float, point: int, nthDegree: int) -> float:
     if x <= -1:
         return float('-int')
     else:
