@@ -61,26 +61,18 @@ def compute_error(true_value: float, approx_value: float) -> list[float]:
     return [absolute_error, percentage_relative_error]
 
 
-def parse_roundingchopping(value: float, roundingchopping: str, numDigits: int) -> float:
+def parse_roundingchopping(value: float, roundingchopping: str, numDigits: int) -> list[float]:
+    if roundingchopping == "BOTH":
+        return [truncate(value, numDigits), round(value, numDigits)]
+
     if roundingchopping == "CHOPPING":
-        return truncate(value, numDigits)
+        return [truncate(value, numDigits)]
     else:
-        return round(value, numDigits)
+        return [round(value, numDigits)]
 
 
-def approx_ln(x) -> float:
-    if x <= -1:
-        print("float-inf")
-        return float('-inf')
-    else:
-        print("math.log has value!")
-        return math.log(x + 1)
-
-
-def approx_taylormaclaurin(x: float, point: int, nthDegree: int) -> float:
-    if x <= -1:
-        return float('-int')
-    else:
-        terms = [((-1)**n * (x - point)**(n+1)) / (n+1)
-                 for n in range(nthDegree)]
-        return sum(terms)
+def approx_taylormaclaurin_ln(x: int, n: int):
+    result = 0
+    for i in range(1, n+1):
+        result += (-1)**(i+1) * (x**i / i)
+    return result

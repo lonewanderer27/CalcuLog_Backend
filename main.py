@@ -3,7 +3,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from internet import internet
-from solvers import wolfram, compute_error, parse_roundingchopping, approx_ln, approx_taylormaclaurin
+import math
+from solvers import wolfram, compute_error, parse_roundingchopping, approx_taylormaclaurin_ln
 
 import uvicorn
 
@@ -54,7 +55,7 @@ async def propagation_error(
         print("approx_value result:", approx_value_result)
 
     # we chop or round the approximated value
-    approx_value_result = parse_roundingchopping(
+    [approx_value_result] = parse_roundingchopping(
         approx_value_result, roundingchopping, numDigits)
 
     # compute absolute_error
@@ -85,14 +86,15 @@ async def propagation_error2(
 ):
     try:
         # if only number is given, then we assign it directly as the true value
+        # then evaluate it directly using python
         true_value_result = eval(trueValue)
         print("equation has no special symbols, solvable!")
     except:
-        # otherwise, if it's an equation we compute the true value
+        # otherwise, if it's an equation we compute the true value using wolfram
         true_value_result = wolfram(trueValue)
         print("true_value result:", true_value_result)
 
-    approx_value = parse_roundingchopping(
+    [approx_value] = parse_roundingchopping(
         true_value_result, roundingchopping, numDigits)
 
     [ab_error, percentage_relative_error] = compute_error(
@@ -111,34 +113,28 @@ async def propagation_error2(
 
 @v1.get("/tm")
 async def taylor_maclaurin(
-    point: int,
+    xvar: int,
     nthDegree: int,
-    roundingchopping: str,
     numDigits: int,
 ):
-    x = 1e-10   # default value
-    true_value_result = approx_ln(x)
-    approx_value_result = approx_taylormaclaurin(x, point, nthDegree)
-    print("true_value: ", true_value_result)
-    print("approx_value: ", approx_value_result)
-
-    approx_value = parse_roundingchopping(
-        approx_value_result, roundingchopping, numDigits
-    )
-    print("approx_value: ", approx_value)
-
-    [ab_error, percentage_relative_error] = compute_error(
-        true_value_result, approx_value
-    )
-
-    print("appox_value:", approx_value)
-    print("absolute_error:", ab_error)
-    print("percentage_relative_error:", percentage_relative_error)
+    true_value_result = math.log(xvar+1)
+    approx_value = approx_taylormaclaurin_ln(xvar, nthDegree)
+    [approx_value_rounded, approx_value_chopped] = parse_roundingchopping(
+        approx_value, "BOTH", numDigits)
+    [absolute_error_rounded, percentage_relative_error_rounded] = compute_error(
+        true_value_result, approx_value_rounded)
+    [absolute_error_chopped, percentage_relative_error_chopped] = compute_error(
+        true_value_result, approx_value_chopped)
 
     return {
+        "true_value": true_value_result,
         "approx_value": approx_value,
-        "absolute_error": ab_error,
-        "percentage_relative_error": percentage_relative_error
+        "approx_value_rounded": approx_value_rounded,
+        "absolute_error_rounded": absolute_error_rounded,
+        "percentage_relative_error_rounded": percentage_relative_error_rounded,
+        "approx_value_chopped": approx_value_chopped,
+        "absolute_error_chopped": absolute_error_chopped,
+        "percentage_relative_error_chopped": percentage_relative_error_chopped
     }
 
 app.mount("/api/v1", v1)
