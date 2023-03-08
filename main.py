@@ -106,8 +106,8 @@ async def propagation_error2(
 
     return {
         "approx_value": approx_value,
-        "absolute_error": ab_error,
-        "percentage_relative_error": percentage_relative_error
+        "absolute_error": abs(ab_error),
+        "percentage_relative_error": abs(percentage_relative_error)
     }
 
 
@@ -131,11 +131,11 @@ async def taylor_maclaurin(
     return {
         "true_value": true_value_result,
         "approx_value_rounded": approx_value_rounded,
-        "absolute_error_rounded": absolute_error_rounded,
-        "percentage_relative_error_rounded": percentage_relative_error_rounded,
+        "absolute_error_rounded": abs(absolute_error_rounded),
+        "percentage_relative_error_rounded": abs(percentage_relative_error_rounded),
         "approx_value_chopped": approx_value_chopped,
-        "absolute_error_chopped": absolute_error_chopped,
-        "percentage_relative_error_chopped": percentage_relative_error_chopped
+        "absolute_error_chopped": abs(absolute_error_chopped),
+        "percentage_relative_error_chopped": abs(percentage_relative_error_chopped)
     }
 
 app.mount("/api/v1", v1)
@@ -146,6 +146,6 @@ if __name__ == "__main__":
     print("checking if there's internet")
     if internet():
         print("there is! proceeding")
-        uvicorn.run("main:app", host="0.0.0.0")
+        uvicorn.run(app, host="0.0.0.0")
     else:
         print("you need active internet connection to run the backend! Please check then try again.")
